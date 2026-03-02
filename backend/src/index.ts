@@ -27,90 +27,216 @@ app.get('/api/health', (req: Request, res: Response) => {
     res.status(200).json({ status: 'ok', message: 'Server is running healthily' });
 });
 
-// Mock Chatbot AI Endpoint (Rule-based)
-app.post('/api/chat', (req: Request, res: Response) => {
-    const { message, email } = req.body;
-    const lower = message.toLowerCase();
-
+app.get('/api/profile/:email', (req: Request, res: Response) => {
+    const email = req.params.email;
     db.get('SELECT * FROM students WHERE email = ?', [email], (err, student: any) => {
-        if (err || !student) {
-            return res.json({ reply: "I couldn't find your profile. Please check your login.", updates: null });
-        }
-
+        if (err || !student) return res.status(404).json({ error: "Profile not found" });
         db.get('SELECT * FROM education_details WHERE student_id = ?', [student.id], (err, edu: any) => {
             db.get('SELECT * FROM applications WHERE student_id = ? LIMIT 1', [student.id], (err, appRec: any) => {
                 let courseId = appRec?.course_id || null;
-                let status = appRec?.status || 'unknown';
-
                 db.get('SELECT * FROM courses WHERE id = ?', [courseId], (err, course: any) => {
-                    const profile = {
+                    res.json({
                         full_name: student.full_name,
                         email: student.email,
-                        phone: student.phone || 'N/A',
-                        date_of_birth: student.date_of_birth || 'N/A',
-                        city: student.city || 'N/A',
-                        tenth_board: edu?.tenth_board || 'N/A',
-                        tenth_percentage: edu?.tenth_percentage || 'N/A',
-                        twelfth_board: edu?.twelfth_board || 'N/A',
-                        twelfth_percentage: edu?.twelfth_percentage || 'N/A',
-                        course: course?.title || 'N/A',
-                        status: status
-                    };
+                        phone: student.phone || '',
+                        date_of_birth: student.date_of_birth || '',
+                        city: student.city || '',
+                        tenth_board: edu?.tenth_board || '',
+                        tenth_percentage: edu?.tenth_percentage || '',
+                        twelfth_board: edu?.twelfth_board || '',
+                        twelfth_percentage: edu?.twelfth_percentage || '',
+                        course: course?.title || '',
+                        status: appRec?.status || ''
+                    });
+                });
+            });
+        });
+    });
+});
 
-                    // Queries
-                    if (lower.includes("name") && (lower.includes("what") || lower.includes("my"))) return res.json({ reply: `Your name is **${profile.full_name}**.` });
-                    if (lower.includes("email") && (lower.includes("what") || lower.includes("my"))) return res.json({ reply: `Your email is **${profile.email}**.` });
-                    if (lower.includes("phone") && (lower.includes("what") || lower.includes("my"))) return res.json({ reply: `Your phone number is **${profile.phone}**.` });
-                    if (lower.includes("dob") || lower.includes("birth") || lower.includes("date of birth")) return res.json({ reply: `Your date of birth is **${profile.date_of_birth}**.` });
-                    if (lower.includes("city")) return res.json({ reply: `Your city is **${profile.city}**.` });
-                    if ((lower.includes("10th") || lower.includes("tenth")) && lower.includes("percentage")) return res.json({ reply: `Your 10th percentage is **${profile.tenth_percentage}%**.` });
-                    if ((lower.includes("12th") || lower.includes("twelfth")) && lower.includes("percentage")) return res.json({ reply: `Your 12th percentage is **${profile.twelfth_percentage}%**.` });
-                    if ((lower.includes("10th") || lower.includes("tenth")) && lower.includes("board")) return res.json({ reply: `Your 10th board is **${profile.tenth_board}**.` });
-                    if ((lower.includes("12th") || lower.includes("twelfth")) && lower.includes("board")) return res.json({ reply: `Your 12th board is **${profile.twelfth_board}**.` });
-                    if (lower.includes("course") && !lower.includes("status")) return res.json({ reply: `Your course is **${profile.course}**.` });
-                    if (lower.includes("status")) return res.json({ reply: `Your course status is **${profile.status}**.` });
-                    if (lower.includes("profile") && (lower.includes("show") || lower.includes("all") || lower.includes("details"))) {
-                        return res.json({ reply: `Here's your profile:\n• **Name:** ${profile.full_name}\n• **Email:** ${profile.email}\n• **Phone:** ${profile.phone}\n• **DOB:** ${profile.date_of_birth}\n• **City:** ${profile.city}\n• **10th:** ${profile.tenth_board} - ${profile.tenth_percentage}%\n• **12th:** ${profile.twelfth_board} - ${profile.twelfth_percentage}%\n• **Course:** ${profile.course} (${profile.status})` });
-                    }
+app.put('/api/profile/:email', (req: Request, res: Response) => {
+    const email = req.params.email;
+    const data = req.body;
+    db.get('SELECT id FROM students WHERE email = ?', [email], (err, student: any) => {
+        if (err || !student) return res.status(404).json({ error: "Profile not found" });
+        db.run(`UPDATE students SET full_name = ?, phone = ?, date_of_birth = ?, city = ? WHERE id = ?`,
+            [data.full_name, data.phone, data.date_of_birth, data.city, student.id], () => {
+                db.run(`UPDATE education_details SET tenth_board = ?, tenth_percentage = ?, twelfth_board = ?, twelfth_percentage = ? WHERE student_id = ?`,
+                    [data.tenth_board, data.tenth_percentage, data.twelfth_board, data.twelfth_percentage, student.id], () => {
+                        res.json({ success: true, updates: data });
+                });
+        });
+    });
+});
 
-                    // Updates
-                    const updatePatterns = [
-                        { keys: ["phone", "number", "mobile"], field: "phone", label: "phone number", table: "students" },
-                        { keys: ["name"], field: "full_name", label: "name", table: "students" },
-                        { keys: ["email"], field: "email", label: "email", table: "students" },
-                        { keys: ["dob", "date of birth", "birth"], field: "date_of_birth", label: "date of birth", table: "students" },
-                        { keys: ["city"], field: "city", label: "city", table: "students" },
-                        { keys: ["10th board", "tenth board"], field: "tenth_board", label: "10th board", table: "education_details" },
-                        { keys: ["12th board", "twelfth board"], field: "twelfth_board", label: "12th board", table: "education_details" },
-                        { keys: ["10th percentage", "tenth percentage"], field: "tenth_percentage", label: "10th percentage", table: "education_details" },
-                        { keys: ["12th percentage", "twelfth percentage"], field: "twelfth_percentage", label: "12th percentage", table: "education_details" },
-                    ];
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-                    if (lower.includes("update") || lower.includes("change") || lower.includes("set")) {
-                        for (const pattern of updatePatterns) {
-                            if (pattern.keys.some((k: string) => lower.includes(k))) {
-                                const toMatch = message.match(/(?:to|as|=)\s+["']?(.+?)["']?\s*$/i);
-                                if (toMatch) {
-                                    const value = toMatch[1].trim();
+// Initialize Gemini with the provided API Key
+const genAI = new GoogleGenerativeAI('AIzaSyB2oINLU96RTGwmJZRQl_ICyPNnNYtyKSA');
 
-                                    // Make actual DB update
-                                    if (pattern.table === 'students') {
-                                        db.run(`UPDATE students SET ${pattern.field} = ? WHERE id = ?`, [value, student.id], () => {
-                                            res.json({ reply: `✅ Updated your ${pattern.label} to **${value}** successfully!`, updates: { [pattern.field]: value } });
-                                        });
-                                    } else if (pattern.table === 'education_details') {
-                                        db.run(`UPDATE education_details SET ${pattern.field} = ? WHERE student_id = ?`, [value, student.id], () => {
-                                            res.json({ reply: `✅ Updated your ${pattern.label} to **${value}** successfully!`, updates: { [pattern.field]: value } });
-                                        });
-                                    }
-                                    return;
-                                }
-                                return res.json({ reply: `Please specify the new value. Example: "Update my ${pattern.label} to [new value]"` });
-                            }
+// Mock Chatbot AI Endpoint (Gemini-based)
+app.post('/api/chat', async (req: Request, res: Response) => {
+    const { message, email } = req.body;
+
+    db.get('SELECT * FROM students WHERE email = ?', [email], async (err, student: any) => {
+        if (err) return res.json({ reply: "Database error occurred.", updates: null });
+        
+        if (!student) {
+            db.run('INSERT INTO students (full_name, email) VALUES (?, ?)', ['New User', email], function(err) {
+                if (err) return res.json({ reply: "Failed to initialize your profile.", updates: null });
+                const newStudentId = this.lastID;
+                db.run('INSERT INTO education_details (student_id) VALUES (?)', [newStudentId], (err) => {
+                    return res.json({ reply: "Welcome! Your profile has been initialized. How can I help you update it?", updates: null });
+                });
+            });
+            return;
+        }
+
+        db.get('SELECT * FROM education_details WHERE student_id = ?', [student.id], async (err, edu: any) => {
+            db.get('SELECT * FROM applications WHERE student_id = ? LIMIT 1', [student.id], async (err, appRec: any) => {
+                let courseId = appRec?.course_id || null;
+                db.get('SELECT * FROM courses WHERE id = ?', [courseId], async (err, course: any) => {
+                    
+                    const profileContext = `Current Profile:
+- Full Name: ${student.full_name}
+- Email: ${student.email}
+- Phone: ${student.phone || 'N/A'}
+- Date of Birth: ${student.date_of_birth || 'N/A'}
+- City: ${student.city || 'N/A'}
+- 10th Board: ${edu?.tenth_board || 'N/A'}
+- 10th Percentage: ${edu?.tenth_percentage || 'N/A'}
+- 12th Board: ${edu?.twelfth_board || 'N/A'}
+- 12th Percentage: ${edu?.twelfth_percentage || 'N/A'}
+- Enrolled Course: ${course?.title || 'N/A'}
+- Application Status: ${appRec?.status || 'N/A'}`;
+
+                    try {
+                        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+                        const prompt = `You are an AI Profile Assistant.
+Your job is to understand natural language and update or retrieve user profile data accurately.
+
+User may:
+- Use typos
+- Use informal language
+- Mix commands in one sentence
+- Ask multiple updates
+- Ask to view profile
+- Give partial information
+
+You must:
+1. Detect user intent correctly
+2. Extract correct fields (name, email, phone, etc.)
+3. Perform updates when requested
+4. Return clear confirmation messages
+5. Handle invalid inputs gracefully (e.g. wrong email format, short phone)
+6. Never fall back unless truly unclear
+
+Supported update fields:
+- full_name (name)
+- email (mail id)
+- phone (mobile)
+- date_of_birth
+- city (location)
+- tenth_board
+- tenth_percentage
+- twelfth_board
+- twelfth_percentage
+- course
+
+Current Profile:
+${profileContext}
+
+The user says: "${message}"
+
+Based on the user's message, determine if they want to view information or update information.
+Respond ONLY with a valid JSON object (no markdown, no backticks, just the raw JSON text) in this EXACT format:
+{
+  "reply": "A helpful conversational reply answering their query, confirming the updates, or returning a helpful error if the input was invalid/wrong format.",
+  "updates": {
+    "field_name": "new_value"
+  }
+}
+If there are multiple valid updates, include all of them in the "updates" object. If no valid updates exist or if an error occurred, set "updates" to strictly null.
+Keep the reply concise, friendly, and use markdown for bolding important values.`;
+
+                        const result = await model.generateContent(prompt);
+                        const responseText = result.response.text();
+                        
+                        // Parse JSON safely
+                        let aiResponse;
+                        try {
+                            const jsonStr = responseText.replace(/```json/gi, '').replace(/```/g, '').trim();
+                            aiResponse = JSON.parse(jsonStr);
+                        } catch (e) {
+                            console.error("Failed to parse Gemini JSON:", responseText);
+                            return res.json({ reply: "I couldn't quite understand that. Please try rephrasing.", updates: null });
                         }
-                    }
 
-                    res.json({ reply: "I can help you view or update your profile! Please specify what you want to query or change." });
+                        // Apply updates if any
+                        if (aiResponse.updates && Object.keys(aiResponse.updates).length > 0) {
+                            const updates = aiResponse.updates;
+                            const updatePromises: Promise<any>[] = [];
+                            
+                            // Students table updates
+                            ["full_name", "email", "phone", "date_of_birth", "city"].forEach(field => {
+                                if (updates[field]) {
+                                    updatePromises.push(new Promise((resolve) => {
+                                        db.run(`UPDATE students SET ${field} = ? WHERE id = ?`, [updates[field], student.id], resolve);
+                                    }));
+                                }
+                            });
+                            
+                            // Education Details updates
+                            ["tenth_board", "tenth_percentage", "twelfth_board", "twelfth_percentage"].forEach(field => {
+                                if (updates[field]) {
+                                    updatePromises.push(new Promise((resolve) => {
+                                        db.run(`UPDATE education_details SET ${field} = ? WHERE student_id = ?`, [updates[field], student.id], resolve);
+                                    }));
+                                }
+                            });
+                            
+                            // Course updates
+                            if (updates.course) {
+                                updatePromises.push(new Promise((resolve) => {
+                                    db.get('SELECT id FROM courses WHERE LOWER(title) LIKE ?', [`%${updates.course.toLowerCase()}%`], (err, c: any) => {
+                                        if (err) console.error("Error finding course:", err);
+                                        
+                                        const applyCourse = (courseId: number) => {
+                                            if (appRec) {
+                                                db.run('UPDATE applications SET course_id = ? WHERE student_id = ?', [courseId, student.id], (err) => {
+                                                    if (err) console.error("Error updating application:", err);
+                                                    resolve(undefined);
+                                                });
+                                            } else {
+                                                db.run('INSERT INTO applications (student_id, course_id, status) VALUES (?, ?, ?)', [student.id, courseId, 'submitted'], (err) => {
+                                                    if (err) console.error("Error inserting application:", err);
+                                                    resolve(undefined);
+                                                });
+                                            }
+                                        };
+
+                                        if (c) {
+                                            applyCourse(c.id);
+                                        } else {
+                                            db.run('INSERT INTO courses (title, duration_months, fee) VALUES (?, ?, ?)', [updates.course, 6, 0], function(err) {
+                                                if (err) console.error("Error inserting course:", err);
+                                                if (!err) applyCourse(this.lastID);
+                                                else resolve(undefined);
+                                            });
+                                        }
+                                    });
+                                }));
+                            }
+
+                            await Promise.all(updatePromises);
+                        }
+
+                        return res.json(aiResponse);
+
+                    } catch (error) {
+                        console.error("Gemini AI error:", error);
+                        return res.json({ reply: "Sorry, I'm having trouble connecting to my AI brain.", updates: null });
+                    }
                 });
             });
         });

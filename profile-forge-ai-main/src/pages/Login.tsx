@@ -1,3 +1,4 @@
+import React from "react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -5,11 +6,11 @@ import { z } from "zod";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { GraduationCap, Eye, EyeOff, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { useToast } from "../hooks/use-toast";
+import { useAuth } from "../hooks/useAuth";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),

@@ -1,8 +1,9 @@
+import React from "react";
 import { motion } from "framer-motion";
 import { Bot, User, GraduationCap, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import DashboardLayout from "@/components/DashboardLayout";
+import { Button } from "../components/ui/button";
+import DashboardLayout from "../components/DashboardLayout";
 
 const cards = [
   { title: "Profile", description: "View and edit your academic profile", icon: User, path: "/dashboard/profile", color: "bg-primary/10 text-primary" },

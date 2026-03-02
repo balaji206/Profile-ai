@@ -1,3 +1,4 @@
+import React from "react";
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 
 interface User {
@@ -18,7 +19,14 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 // Demo users store (replaced by real backend when Cloud is connected)
-const DEMO_USERS: { full_name: string; email: string; password: string }[] = [];
+const getDemoUsers = () => {
+  const users = localStorage.getItem("forge_demo_users");
+  return users ? JSON.parse(users) : [];
+};
+
+const saveDemoUsers = (users: any[]) => {
+  localStorage.setItem("forge_demo_users", JSON.stringify(users));
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
@@ -30,7 +38,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     // Demo auth - replace with real API
     await new Promise((r) => setTimeout(r, 800));
-    const found = DEMO_USERS.find((u) => u.email === email && u.password === password);
+    const demoUsers = getDemoUsers();
+    const found = demoUsers.find((u: any) => u.email === email && u.password === password);
     if (!found && !(email === "demo@forge.ai" && password === "password123")) {
       throw new Error("Invalid credentials");
     }
@@ -45,10 +54,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(async (full_name: string, email: string, password: string) => {
     await new Promise((r) => setTimeout(r, 800));
-    if (DEMO_USERS.find((u) => u.email === email)) {
+    const demoUsers = getDemoUsers();
+    if (demoUsers.find((u: any) => u.email === email)) {
       throw new Error("Email already registered");
     }
-    DEMO_USERS.push({ full_name, email, password });
+    const newUsers = [...demoUsers, { full_name, email, password }];
+    saveDemoUsers(newUsers);
   }, []);
 
   const logout = useCallback(() => {

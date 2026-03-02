@@ -1,15 +1,15 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import React from "react";
+import { Toaster } from "../src/components/ui/sonner";
+import { Toaster as Sonner } from "../src/components/ui/sonner";
+import { TooltipProvider } from "../src/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import Login from "@/pages/Login";
-import Register from "@/pages/Register";
-import DashboardHome from "@/pages/DashboardHome";
-import ProfilePage from "@/pages/ProfilePage";
-import NotFound from "./pages/NotFound";
+import { AuthProvider } from "../src/hooks/useAuth";
+import ProtectedRoute from "../src/components/ProtectedRoute";
+import Login from "../src/pages/Login";
+import Register from "../src/pages/Register";
+import ProfilePage from "../src/pages/ProfilePage";
+import NotFound from "../src/pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -24,11 +24,11 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route element={<ProtectedRoute />}>
-              <Route path="/dashboard" element={<DashboardHome />} />
+              <Route path="/dashboard" element={<Navigate to="/dashboard/profile" replace />} />
               <Route path="/dashboard/profile" element={<ProfilePage />} />
               <Route path="/dashboard/assistant" element={<Navigate to="/dashboard/profile" replace />} />
             </Route>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<Navigate to="/dashboard/profile" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           {/* Global chat widget on protected pages */}

@@ -1,10 +1,11 @@
+import React from "react";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { GraduationCap, User, LogOut, Menu, X, ChevronDown } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { useAuth } from "../hooks/useAuth";
+import { Avatar, AvatarFallback } from "../components/ui/avatar";
+import { Button } from "../components/ui/button";
 
 const navItems = [
   { label: "Profile", icon: User, path: "/dashboard/profile" },
@@ -36,7 +37,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center">
               <GraduationCap className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg hidden sm:inline gradient-text">Forge AI</span>
+            <span className="font-bold text-lg hidden sm:inline gradient-text text-white">Forge AI</span>
           </Link>
         </div>
 

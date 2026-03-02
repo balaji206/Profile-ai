@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { StudentProfile, defaultProfile } from "@/types/profile";
+import { StudentProfile, defaultProfile } from "../types/profile";
 
 // Simple store to simulate DB - will be replaced by real backend
 interface ProfileStore {

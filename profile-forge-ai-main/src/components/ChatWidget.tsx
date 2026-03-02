@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, X, Send, Trash2, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { useProfileStore } from "@/store/profileStore";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { useToast } from "../hooks/use-toast";
+import { useProfileStore } from "../store/profileStore";
 import { useQueryClient } from "@tanstack/react-query";
-import { StudentProfile } from "@/types/profile";
+import { StudentProfile } from "../types/profile";
 
 interface ChatMessage {
   id: string;
@@ -15,7 +15,7 @@ interface ChatMessage {
   timestamp: Date;
 }
 
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "../hooks/useAuth";
 
 const ChatWidget = () => {
   const [open, setOpen] = useState(false);
