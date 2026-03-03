@@ -16,6 +16,8 @@ interface ChatMessage {
   timestamp: Date;
 }
 
+const API_BASE = import.meta.env.VITE_API_URL || "";
+
 const InlineChatWidget = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { id: "welcome", role: "assistant", content: "👋 Hi! I'm your AI Profile Assistant. Ask me about your profile or tell me what to update!", timestamp: new Date() },
@@ -41,7 +43,7 @@ const InlineChatWidget = () => {
     setIsTyping(true);
 
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch(`${API_BASE}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMsg.content, email: user.email })

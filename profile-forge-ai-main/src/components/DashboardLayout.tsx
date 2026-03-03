@@ -2,7 +2,7 @@ import React from "react";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { GraduationCap, User, LogOut, Menu, X, ChevronDown } from "lucide-react";
+import { User, LogOut, Menu, X, ChevronDown } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { Avatar, AvatarFallback } from "../components/ui/avatar";
 import { Button } from "../components/ui/button";
@@ -34,10 +34,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
           <Link to="/dashboard" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center">
-              <GraduationCap className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-lg hidden sm:inline gradient-text text-white">Forge AI</span>
+            <img src="/logo.png" alt="Gradia Logo" className="h-8 w-auto object-contain" />
           </Link>
         </div>
 
@@ -79,8 +76,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                   to={item.path}
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive
-                      ? "bg-primary text-primary-foreground shadow-soft"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                    ? "bg-primary text-primary-foreground shadow-soft"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
                     }`}
                 >
                   <item.icon className="w-5 h-5" />
