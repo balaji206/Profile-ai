@@ -49,16 +49,13 @@ const Login = () => {
       >
         <div className="text-center mb-8">
           <motion.div
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            className="inline-flex items-center gap-2 mb-4"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="inline-flex items-center justify-center mb-4"
           >
-            <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center">
-              <GraduationCap className="w-7 h-7 text-primary-foreground" />
-            </div>
+            <img src="/logo.png" alt="Gradia Logo" className="h-20 w-auto object-contain" />
           </motion.div>
-          <h1 className="text-2xl font-bold gradient-text">Forge AI</h1>
-          <p className="text-muted-foreground mt-1">Sign in to your profile assistant</p>
+          <p className="text-muted-foreground mt-1">Sign in to your Gradia assistant</p>
         </div>
 
         <div className="glass-card rounded-2xl p-8">

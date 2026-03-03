@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Bot, User, GraduationCap, ArrowRight } from "lucide-react";
+import { Bot, User, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import DashboardLayout from "../components/DashboardLayout";

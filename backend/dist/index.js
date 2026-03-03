@@ -11,9 +11,14 @@ const path_1 = __importDefault(require("path"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
-app.use((0, cors_1.default)());
-app.use(express_1.default.json());
-app.use(express_1.default.urlencoded({ extended: true }));
+app.use((0, cors_1.default)({
+    origin: ['http://localhost:8080', 'https://gradia-ai.netlify.app', 'https://profile-ai-t3ea.onrender.com'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.use(express_1.default.json({ limit: '50mb' }));
+app.use(express_1.default.urlencoded({ limit: '50mb', extended: true }));
 const dbPath = path_1.default.join(__dirname, '../kalviumlabs_forge.sqlite');
 const db = new sqlite3_1.default.Database(dbPath, (err) => {
     if (err) {
@@ -222,16 +227,18 @@ Supported update fields:
 - phone (mobile)
 - date_of_birth
 - city (location)
-- tenth_board
-- tenth_percentage
-- twelfth_board
-- twelfth_percentage
+- tenth_board (The academic board name, e.g., CBSE, State Board, ICSE)
+- tenth_percentage (The academic mark/percent achieved, e.g., 85%, 92.5)
+- twelfth_board (Board name for 12th)
+- twelfth_percentage (Percentage for 12th)
 - course
 
 Current Profile:
 ${profileContext}
 
 The user says: "${message}"
+
+IMPORTANT: If the user mentions "10th board" or "12th board", they refer to the board name (e.g., CBSE), NOT the percentage. If they mention "marks", "percentage", or "%", update the percentage field.
 
 Based on the user's message, determine if they want to view information or update information.
 Respond ONLY with a valid JSON object (no markdown, no backticks, just the raw JSON text) in this EXACT format:

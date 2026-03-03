@@ -34,6 +34,8 @@ interface ProfileForm {
   profile_image?: string;
 }
 
+const API_BASE = (import.meta as any).env.VITE_API_URL || "";
+
 const ProfilePage = () => {
   const [editingField, setEditingField] = useState<(keyof ProfileForm & string) | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -55,7 +57,7 @@ const ProfilePage = () => {
     queryKey: ["profile"],
     queryFn: async () => {
       if (!user?.email) return null;
-      const res = await fetch(`/api/profile/${user.email}`);
+      const res = await fetch(`${API_BASE}/api/profile/${user.email}`);
       if (!res.ok) throw new Error("Profile not found");
       const profileData = await res.json();
       updateProfile(profileData);
@@ -72,7 +74,7 @@ const ProfilePage = () => {
   const onSubmit = async (formData: ProfileForm) => {
     if (!user?.email) return;
     try {
-      const res = await fetch(`/api/profile/${user.email}`, {
+      const res = await fetch(`${API_BASE}/api/profile/${user.email}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -165,7 +167,7 @@ const ProfilePage = () => {
           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-md">
             <GraduationCap className="w-5 h-5 text-white" />
           </div>
-          <span className="font-bold text-lg hidden sm:inline text-gray-900 tracking-tight">Forge AI</span>
+          <span className="font-bold text-lg hidden sm:inline text-gray-900 tracking-tight">Gradia AI</span>
         </Link>
 
         <div className="relative">

@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { GraduationCap, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -53,13 +53,10 @@ const Register = () => {
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center">
-              <GraduationCap className="w-7 h-7 text-primary-foreground" />
-            </div>
+          <div className="inline-flex items-center justify-center mb-4">
+            <img src="/logo.png" alt="Gradia Logo" className="h-20 w-auto object-contain" />
           </div>
-          <h1 className="text-2xl font-bold gradient-text">Create Account</h1>
-          <p className="text-muted-foreground mt-1">Get started with Forge AI</p>
+          <p className="text-muted-foreground mt-1">Get started with Gradia</p>
         </div>
 
         <div className="glass-card rounded-2xl p-8">
