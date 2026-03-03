@@ -36,16 +36,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem("forge_token"));
 
   const login = useCallback(async (email: string, password: string) => {
-    // Demo auth - replace with real API
-    await new Promise((r) => setTimeout(r, 800));
-    const demoUsers = getDemoUsers();
-    const found = demoUsers.find((u: any) => u.email === email && u.password === password);
-    if (!found && !(email === "demo@forge.ai" && password === "password123")) {
-      throw new Error("Invalid credentials");
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || "Invalid credentials");
     }
-    const u = found || { full_name: "Demo User", email: "demo@forge.ai", password: "" };
-    const fakeToken = btoa(JSON.stringify({ email: u.email, exp: Date.now() + 86400000 }));
-    const userData = { id: "1", full_name: u.full_name, email: u.email };
+
+    const fakeToken = btoa(JSON.stringify({ email: data.email, exp: Date.now() + 86400000 }));
+    const userData = { id: String(data.id), full_name: data.full_name, email: data.email };
+
     localStorage.setItem("forge_token", fakeToken);
     localStorage.setItem("forge_user", JSON.stringify(userData));
     setToken(fakeToken);
@@ -53,13 +57,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const register = useCallback(async (full_name: string, email: string, password: string) => {
-    await new Promise((r) => setTimeout(r, 800));
-    const demoUsers = getDemoUsers();
-    if (demoUsers.find((u: any) => u.email === email)) {
-      throw new Error("Email already registered");
+    const res = await fetch("/api/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ full_name, email, password }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || "Registration failed");
     }
-    const newUsers = [...demoUsers, { full_name, email, password }];
-    saveDemoUsers(newUsers);
   }, []);
 
   const logout = useCallback(() => {
