@@ -28,7 +28,7 @@ const saveDemoUsers = (users: any[]) => {
   localStorage.setItem("forge_demo_users", JSON.stringify(users));
 };
 
-const API_BASE = import.meta.env.VITE_API_URL || "";
+const API_BASE = (import.meta as any).env.VITE_API_URL || "";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {

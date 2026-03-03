@@ -11,13 +11,13 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-    origin: ['http://localhost:8080', 'https://gradia-ai.netlify.app'],
+    origin: ['http://localhost:8080', 'https://gradia-ai.netlify.app', 'https://profile-ai-t3ea.onrender.com'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const dbPath = path.join(__dirname, '../kalviumlabs_forge.sqlite');
 const db = new sqlite3.Database(dbPath, (err) => {
@@ -229,23 +229,26 @@ You must:
 4. Return clear confirmation messages
 5. Handle invalid inputs gracefully (e.g. wrong email format, short phone)
 6. Never fall back unless truly unclear
-
+7. **NEVER DELETE OR CLEAR DATA**: If a user asks to "delete", "remove", or "clear" a field, you MUST politely refuse and explain that data can only be updated, not deleted, to maintain profile integrity.
+8. **Preserve Unrelated Data**: Only update the specific fields mentioned by the user. Never touch or change other fields.
 Supported update fields:
 - full_name (name)
 - email (mail id)
 - phone (mobile)
 - date_of_birth
 - city (location)
-- tenth_board
-- tenth_percentage
-- twelfth_board
-- twelfth_percentage
+- tenth_board (The academic board name, e.g., CBSE, State Board, ICSE)
+- tenth_percentage (The academic mark/percent achieved, e.g., 85%, 92.5)
+- twelfth_board (Board name for 12th)
+- twelfth_percentage (Percentage for 12th)
 - course
 
 Current Profile:
 ${profileContext}
 
 The user says: "${message}"
+
+IMPORTANT: If the user mentions "10th board" or "12th board", they refer to the board name (e.g., CBSE), NOT the percentage. If they mention "marks", "percentage", or "%", update the percentage field.
 
 Based on the user's message, determine if they want to view information or update information.
 Respond ONLY with a valid JSON object (no markdown, no backticks, just the raw JSON text) in this EXACT format:

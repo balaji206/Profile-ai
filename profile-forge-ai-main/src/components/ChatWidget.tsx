@@ -17,7 +17,7 @@ interface ChatMessage {
 
 import { useAuth } from "../hooks/useAuth";
 
-const API_BASE = import.meta.env.VITE_API_URL || "";
+const API_BASE = (import.meta as any).env.VITE_API_URL || "";
 
 const ChatWidget = () => {
   const [open, setOpen] = useState(false);
