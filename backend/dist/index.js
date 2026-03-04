@@ -61,11 +61,16 @@ app.get('/api/profile/:email', (req, res) => {
 app.put('/api/profile/:email', (req, res) => {
     const email = req.params.email;
     const data = req.body;
+    console.log('PUT Profile Update Request:', { email, fields: Object.keys(data), hasImage: !!data.profile_image });
     db.get('SELECT id FROM students WHERE email = ?', [email], (err, student) => {
         if (err || !student)
             return res.status(404).json({ error: "Profile not found" });
-        db.run(`UPDATE students SET full_name = ?, phone = ?, date_of_birth = ?, city = ?, profile_image = ? WHERE id = ?`, [data.full_name, data.phone, data.date_of_birth, data.city, data.profile_image, student.id], () => {
-            db.run(`UPDATE education_details SET tenth_board = ?, tenth_percentage = ?, twelfth_board = ?, twelfth_percentage = ? WHERE student_id = ?`, [data.tenth_board, data.tenth_percentage, data.twelfth_board, data.twelfth_percentage, student.id], () => {
+        db.run(`UPDATE students SET full_name = ?, phone = ?, date_of_birth = ?, city = ?, profile_image = ? WHERE id = ?`, [data.full_name, data.phone, data.date_of_birth, data.city, data.profile_image, student.id], (err) => {
+            if (err)
+                console.error("Error updating student profile:", err);
+            db.run(`UPDATE education_details SET tenth_board = ?, tenth_percentage = ?, twelfth_board = ?, twelfth_percentage = ? WHERE student_id = ?`, [data.tenth_board, data.tenth_percentage, data.twelfth_board, data.twelfth_percentage, student.id], (err) => {
+                if (err)
+                    console.error("Error updating education details:", err);
                 res.json({ success: true, updates: data });
             });
         });
@@ -220,7 +225,8 @@ You must:
 4. Return clear confirmation messages
 5. Handle invalid inputs gracefully (e.g. wrong email format, short phone)
 6. Never fall back unless truly unclear
-
+7. **NEVER DELETE OR CLEAR DATA**: If a user asks to "delete", "remove", or "clear" a field, you MUST politely refuse and explain that data can only be updated, not deleted, to maintain profile integrity.
+8. **Preserve Unrelated Data**: Only update the specific fields mentioned by the user. Never touch or change other fields.
 Supported update fields:
 - full_name (name)
 - email (mail id)
@@ -232,6 +238,7 @@ Supported update fields:
 - twelfth_board (Board name for 12th)
 - twelfth_percentage (Percentage for 12th)
 - course
+- profile_image (Profile picture URL or path)
 
 Current Profile:
 ${profileContext}
@@ -277,10 +284,14 @@ Keep the reply concise, friendly, and use markdown for bolding important values.
                                 updates.date_of_birth = updates.dob || updates.birthday;
                             const updatePromises = [];
                             // Students table updates
-                            ["full_name", "email", "phone", "date_of_birth", "city"].forEach(field => {
+                            ["full_name", "email", "phone", "date_of_birth", "city", "profile_image"].forEach(field => {
                                 if (updates[field]) {
                                     updatePromises.push(new Promise((resolve) => {
-                                        db.run(`UPDATE students SET ${field} = ? WHERE id = ?`, [updates[field], student.id], resolve);
+                                        db.run(`UPDATE students SET ${field} = ? WHERE id = ?`, [updates[field], student.id], (err) => {
+                                            if (err)
+                                                console.error(`Error updating student field ${field}:`, err);
+                                            resolve(undefined);
+                                        });
                                     }));
                                 }
                             });
@@ -288,7 +299,11 @@ Keep the reply concise, friendly, and use markdown for bolding important values.
                             ["tenth_board", "tenth_percentage", "twelfth_board", "twelfth_percentage"].forEach(field => {
                                 if (updates[field]) {
                                     updatePromises.push(new Promise((resolve) => {
-                                        db.run(`UPDATE education_details SET ${field} = ? WHERE student_id = ?`, [updates[field], student.id], resolve);
+                                        db.run(`UPDATE education_details SET ${field} = ? WHERE student_id = ?`, [updates[field], student.id], (err) => {
+                                            if (err)
+                                                console.error(`Error updating education field ${field}:`, err);
+                                            resolve(undefined);
+                                        });
                                     }));
                                 }
                             });
