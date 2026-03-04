@@ -63,12 +63,15 @@ app.get('/api/profile/:email', (req: Request, res: Response) => {
 app.put('/api/profile/:email', (req: Request, res: Response) => {
     const email = req.params.email;
     const data = req.body;
+    console.log('PUT Profile Update Request:', { email, fields: Object.keys(data), hasImage: !!data.profile_image });
     db.get('SELECT id FROM students WHERE email = ?', [email], (err, student: any) => {
         if (err || !student) return res.status(404).json({ error: "Profile not found" });
         db.run(`UPDATE students SET full_name = ?, phone = ?, date_of_birth = ?, city = ?, profile_image = ? WHERE id = ?`,
-            [data.full_name, data.phone, data.date_of_birth, data.city, data.profile_image, student.id], () => {
+            [data.full_name, data.phone, data.date_of_birth, data.city, data.profile_image, student.id], (err) => {
+                if (err) console.error("Error updating student profile:", err);
                 db.run(`UPDATE education_details SET tenth_board = ?, tenth_percentage = ?, twelfth_board = ?, twelfth_percentage = ? WHERE student_id = ?`,
-                    [data.tenth_board, data.tenth_percentage, data.twelfth_board, data.twelfth_percentage, student.id], () => {
+                    [data.tenth_board, data.tenth_percentage, data.twelfth_board, data.twelfth_percentage, student.id], (err) => {
+                        if (err) console.error("Error updating education details:", err);
                         res.json({ success: true, updates: data });
                     });
             });
@@ -242,6 +245,7 @@ Supported update fields:
 - twelfth_board (Board name for 12th)
 - twelfth_percentage (Percentage for 12th)
 - course
+- profile_image (Profile picture URL or path)
 
 Current Profile:
 ${profileContext}
@@ -287,10 +291,13 @@ Keep the reply concise, friendly, and use markdown for bolding important values.
                             const updatePromises: Promise<any>[] = [];
 
                             // Students table updates
-                            ["full_name", "email", "phone", "date_of_birth", "city"].forEach(field => {
+                            ["full_name", "email", "phone", "date_of_birth", "city", "profile_image"].forEach(field => {
                                 if (updates[field]) {
                                     updatePromises.push(new Promise((resolve) => {
-                                        db.run(`UPDATE students SET ${field} = ? WHERE id = ?`, [updates[field], student.id], resolve);
+                                        db.run(`UPDATE students SET ${field} = ? WHERE id = ?`, [updates[field], student.id], (err) => {
+                                            if (err) console.error(`Error updating student field ${field}:`, err);
+                                            resolve(undefined);
+                                        });
                                     }));
                                 }
                             });
@@ -299,7 +306,10 @@ Keep the reply concise, friendly, and use markdown for bolding important values.
                             ["tenth_board", "tenth_percentage", "twelfth_board", "twelfth_percentage"].forEach(field => {
                                 if (updates[field]) {
                                     updatePromises.push(new Promise((resolve) => {
-                                        db.run(`UPDATE education_details SET ${field} = ? WHERE student_id = ?`, [updates[field], student.id], resolve);
+                                        db.run(`UPDATE education_details SET ${field} = ? WHERE student_id = ?`, [updates[field], student.id], (err) => {
+                                            if (err) console.error(`Error updating education field ${field}:`, err);
+                                            resolve(undefined);
+                                        });
                                     }));
                                 }
                             });

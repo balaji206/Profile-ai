@@ -17,7 +17,7 @@ interface ChatMessage {
 
 import { useAuth } from "../hooks/useAuth";
 
-const API_BASE = (import.meta as any).env.VITE_API_URL || "";
+const API_BASE = import.meta.env.VITE_API_URL || "https://profile-ai-t3ea.onrender.com";
 
 const ChatWidget = () => {
   const [open, setOpen] = useState(false);
@@ -33,9 +33,15 @@ const ChatWidget = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
   useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages, isTyping]);
+    scrollToBottom();
+  }, [messages, isTyping, scrollToBottom]);
 
   useEffect(() => {
     if (open) inputRef.current?.focus();
@@ -136,6 +142,7 @@ const ChatWidget = () => {
                   <span className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                 </motion.div>
               )}
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Input */}
@@ -145,19 +152,24 @@ const ChatWidget = () => {
                   ref={inputRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  }}
                   placeholder="Ask about your profile..."
                   className="h-10 text-sm"
                   disabled={isTyping}
                 />
-                <Button onClick={sendMessage} size="icon" className="h-10 w-10 gradient-primary text-primary-foreground shrink-0" disabled={!input.trim() || isTyping}>
+                <Button type="button" onClick={sendMessage} size="icon" className="h-10 w-10 gradient-primary text-primary-foreground shrink-0" disabled={!input.trim() || isTyping}>
                   {isTyping ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 </Button>
               </div>
             </div>
-          </motion.div>
+          </motion.div >
         )}
-      </AnimatePresence>
+      </AnimatePresence >
     </>
   );
 };

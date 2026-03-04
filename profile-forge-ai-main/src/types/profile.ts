@@ -11,6 +11,7 @@ export interface StudentProfile {
   twelfth_percentage: string;
   course: string;
   status: string;
+  profile_image?: string;
 }
 
 export const defaultProfile: StudentProfile = {
@@ -26,4 +27,5 @@ export const defaultProfile: StudentProfile = {
   twelfth_percentage: "89.6",
   course: "Full Stack Development",
   status: "submitted",
+  profile_image: "",
 };

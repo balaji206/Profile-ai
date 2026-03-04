@@ -34,7 +34,7 @@ interface ProfileForm {
   profile_image?: string;
 }
 
-const API_BASE = (import.meta as any).env.VITE_API_URL || "";
+const API_BASE = import.meta.env.VITE_API_URL || "https://profile-ai-t3ea.onrender.com";
 
 const ProfilePage = () => {
   const [editingField, setEditingField] = useState<(keyof ProfileForm & string) | null>(null);
