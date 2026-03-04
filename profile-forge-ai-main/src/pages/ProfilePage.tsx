@@ -106,8 +106,9 @@ const ProfilePage = () => {
       }
       const reader = new FileReader();
       reader.onloadend = () => {
-        setValue("profile_image", reader.result as string);
-        handleSubmit(onSubmit)();
+        setValue("profile_image", reader.result as string, { shouldDirty: true, shouldValidate: true });
+        // Small delay to ensure state update before submit
+        setTimeout(() => handleSubmit(onSubmit)(), 50);
       };
       reader.readAsDataURL(file);
     }

@@ -1,7 +1,7 @@
 import React from "react";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
 import { Bot, Send, Trash2, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { useToast } from "../hooks/use-toast";
@@ -92,8 +92,9 @@ const InlineChatWidget = () => {
         {messages.map((msg) => (
           <motion.div
             key={msg.id}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ type: "spring", damping: 20, stiffness: 400 }}
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${msg.role === "user"
@@ -141,7 +142,7 @@ const InlineChatWidget = () => {
           </Button>
         </div>
       </div>
-    </div >
+    </div>
   );
 };
 
