@@ -1,4 +1,4 @@
-# 🤖 AI Profile Updater
+# Gradia - AI Profile Updater
 
 An **AI-powered profile management system** where users can update their profile simply by **chatting with an AI assistant**.  
 Instead of manually editing profile fields, users describe the changes in natural language and the AI automatically updates the relevant sections.
